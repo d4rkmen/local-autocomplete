@@ -1,0 +1,248 @@
+{
+  "name": "local-autocomplete",
+  "displayName": "Local Autocomplete",
+  "description": "Inline code completions from a local OpenAI-compatible server, with Cursor Tab-style editor context, an on/off toggle and model picker.",
+  "version": "0.4.4",
+  "publisher": "local",
+  "license": "MIT",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "autocomplete",
+    "inline",
+    "local",
+    "llm",
+    "lm studio",
+    "llama.cpp"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "scripts": {
+    "package": "npx --yes @vscode/vsce@latest package --allow-missing-repository --skip-license"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "localAutocomplete.toggle",
+        "title": "Toggle",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.enable",
+        "title": "Enable",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.disable",
+        "title": "Disable",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.setBaseUrl",
+        "title": "Set Base URL",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.selectModel",
+        "title": "Select Model",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.configure",
+        "title": "Configure",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.openSettings",
+        "title": "Open Settings",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.editSettings",
+        "title": "Edit settings.json",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.showContext",
+        "title": "Show Last Context",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.showLastError",
+        "title": "Show Last Error",
+        "category": "Local Autocomplete"
+      },
+      {
+        "command": "localAutocomplete.clearCursorKeyCache",
+        "title": "Forget Cached Cursor Key",
+        "category": "Local Autocomplete"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "localAutocomplete.toggle",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Local Autocomplete",
+      "properties": {
+        "localAutocomplete.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show inline completions from the local model."
+        },
+        "localAutocomplete.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Base URL of an OpenAI-compatible server, including /v1. Leave empty to use the Cursor Private Inference base URL (Settings -> Models -> Gateway).",
+          "markdownDescription": "Base URL of an OpenAI-compatible server, including `/v1`.\n\nLeave empty to use the **Cursor Private Inference base URL** (Settings -> Models -> Gateway; then `CURSOR_LOCAL_AGENT_BASE_URL`, then `ANTHROPIC_BASE_URL`)."
+        },
+        "localAutocomplete.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Bearer token sent to the server. Leave empty to use the Cursor Private Inference API key (Settings -> Models -> Gateway).",
+          "markdownDescription": "Bearer token sent to the server.\n\nLeave empty to use the **Cursor Private Inference API key** (Settings -> Models -> Gateway; then `CURSOR_LOCAL_AGENT_API_KEY`, then `ANTHROPIC_AUTH_TOKEN`)."
+        },
+        "localAutocomplete.cacheCursorKey": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Reuse the decrypted Cursor Private Inference key across windows.\n\nThe key is read from Cursor's Keychain entry via `/usr/bin/security`, which macOS treats as a different application, so it asks for your password on every window unless the answer is cached. Caching stores the decrypted key in this extension's SecretStorage (encrypted by the editor) and skips Keychain access while the stored Cursor key is unchanged. Turn off to never keep a second copy; run **Forget Cached Cursor Key** to drop it."
+        },
+        "localAutocomplete.model": {
+          "type": "string",
+          "default": "",
+          "description": "Model id to request. Leave empty to use the first model returned by /v1/models."
+        },
+        "localAutocomplete.mode": {
+          "type": "string",
+          "enum": [
+            "chat",
+            "completions"
+          ],
+          "enumDescriptions": [
+            "Use /v1/chat/completions with instructions. Works with any instruct model.",
+            "Use /v1/completions with a fill-in-the-middle template. Needs a model and template that match."
+          ],
+          "default": "chat",
+          "description": "Request format used for completions."
+        },
+        "localAutocomplete.fimTemplate": {
+          "type": "string",
+          "default": "<|fim_prefix|>{prefix}<|fim_suffix|>{suffix}<|fim_middle|>",
+          "description": "Prompt template for completions mode. {prefix} and {suffix} are replaced. Must match the model's FIM tokens."
+        },
+        "localAutocomplete.stopSequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Stop sequences for completions mode."
+        },
+        "localAutocomplete.debounceMs": {
+          "type": "number",
+          "default": 300,
+          "minimum": 0,
+          "maximum": 3000,
+          "description": "Wait this long after a change before asking the model."
+        },
+        "localAutocomplete.timeoutMs": {
+          "type": "number",
+          "default": 15000,
+          "minimum": 1000,
+          "description": "Abort a completion request after this many milliseconds."
+        },
+        "localAutocomplete.maxPrefixChars": {
+          "type": "number",
+          "default": 6000,
+          "minimum": 200,
+          "description": "Maximum characters of code before the cursor sent to the model."
+        },
+        "localAutocomplete.maxSuffixChars": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 0,
+          "description": "Maximum characters of code after the cursor sent to the model."
+        },
+        "localAutocomplete.maxTokens": {
+          "type": "number",
+          "default": 256,
+          "minimum": 16,
+          "description": "Maximum tokens the model may generate."
+        },
+        "localAutocomplete.maxSuggestionChars": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 50,
+          "description": "Discard suggestions longer than this many characters."
+        },
+        "localAutocomplete.extendedContext": {
+          "type": "boolean",
+          "default": true,
+          "description": "Send Tab-style editor context with each completion request: current file metadata, diagnostics, signature help, completion candidates, recent edits, open files, and recently viewed files.",
+          "markdownDescription": "Send **Tab-style editor context** with each completion request: current file metadata, diagnostics, signature help, completion candidates, recent edits, open files, and recently viewed files.\n\nDisable this to send only the code around the cursor."
+        },
+        "localAutocomplete.contextMaxChars": {
+          "type": "number",
+          "default": 8000,
+          "minimum": 0,
+          "maximum": 50000,
+          "description": "Maximum characters of extra context per request. 0 disables the context block."
+        },
+        "localAutocomplete.contextMaxFiles": {
+          "type": "number",
+          "default": 6,
+          "minimum": 0,
+          "maximum": 20,
+          "description": "Maximum number of open/recently viewed files included in the context."
+        },
+        "localAutocomplete.contextFileMaxChars": {
+          "type": "number",
+          "default": 2500,
+          "minimum": 200,
+          "maximum": 20000,
+          "description": "Maximum characters taken from each additional file."
+        },
+        "localAutocomplete.contextInCompletionsMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include the context block in completions (FIM) mode. FIM models often prefer a raw prompt; enable only if your model handles it."
+        },
+        "localAutocomplete.languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Only enable these language ids. Empty means all languages."
+        },
+        "localAutocomplete.disabledLanguages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "plaintext"
+          ],
+          "description": "Language ids where completions should not run."
+        },
+        "localAutocomplete.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Local Autocomplete on/off indicator in the status bar."
+        }
+      }
+    }
+  }
+}

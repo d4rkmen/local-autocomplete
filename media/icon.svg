@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Local Autocomplete">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#312E81"/>
+      <stop offset="0.55" stop-color="#1E1B4B"/>
+      <stop offset="1" stop-color="#0B1120"/>
+    </linearGradient>
+    <linearGradient id="code" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#818CF8"/>
+    </linearGradient>
+    <linearGradient id="ghost" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67E8F9" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#818CF8" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="27" fill="url(#bg)"/>
+  <rect x="4" y="4" width="120" height="120" rx="27" fill="none" stroke="#6366F1" stroke-opacity="0.55" stroke-width="1.5"/>
+  <circle cx="46" cy="54" r="34" fill="#22D3EE" opacity="0.10" filter="url(#soft)"/>
+  <rect x="28" y="40" width="5" height="48" rx="2.5" fill="#F472B6"/>
+  <rect x="42" y="40" width="44" height="10" rx="5" fill="url(#code)"/>
+  <rect x="42" y="58" width="30" height="10" rx="5" fill="url(#code)" opacity="0.85"/>
+  <rect x="42" y="76" width="52" height="10" rx="5" fill="url(#ghost)"/>
+  <path d="M96 20 C97.3 30.7 99.3 32.7 110 34 C99.3 35.3 97.3 37.3 96 48 C94.7 37.3 92.7 35.3 82 34 C92.7 32.7 94.7 30.7 96 20 Z" fill="url(#spark)"/>
+  <path d="M112 50 C112.6 54.4 113.6 55.4 118 56 C113.6 56.6 112.6 57.6 112 62 C111.4 57.6 110.4 56.6 106 56 C110.4 55.4 111.4 54.4 112 50 Z" fill="#FDE68A" opacity="0.9"/>
+</svg>
